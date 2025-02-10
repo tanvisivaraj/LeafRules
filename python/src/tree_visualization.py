@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from sklearn import tree
 
-def visualize_tree(clf, feature_names, class_names, save_path):
+def visualize_tree(clf, feature_names, class_names, save_path=None):
     """
     Plot and save the visualization of a trained Decision Tree.
 
@@ -25,6 +25,9 @@ def visualize_tree(clf, feature_names, class_names, save_path):
         fontsize=10
     )
 
+    if save_path is None:
+        save_path = "tree.png"  # Default file name
+        
     plt.savefig(save_path, dpi=300, bbox_inches="tight")
     print(f"Tree visualization saved to {save_path}")
     
