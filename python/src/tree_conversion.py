@@ -38,7 +38,6 @@ def tree_to_select(tree, feature_names):
     values_str = ",\n    ".join(values)
 
     formatted_output = (
-        "import numpy as np\n\n"
         "predictions = np.select(\n"
         "    [\n        " + conditions_str + "\n    ],\n"
         "    [\n        " + values_str + "\n    ],\n"
