@@ -1,4 +1,6 @@
+import numpy as np
 import pandas as pd
+from tabulate import tabulate  # For CLI table formatting
 
 def tree_to_select(tree, feature_names):
     """
@@ -9,7 +11,7 @@ def tree_to_select(tree, feature_names):
     - feature_names (list): List of feature names
 
     Returns:
-    - str: NumPy select expression
+    - str: Well-formatted NumPy select expression
     """
     tree_ = tree.tree_
     conditions = []
@@ -35,12 +37,22 @@ def tree_to_select(tree, feature_names):
     conditions_str = ",\n    ".join(f"[{cond}]" for cond in conditions)
     values_str = ",\n    ".join(values)
 
-    return f"np.select([\n    {conditions_str}\n], [\n    {values_str}\n], default=-1)"
+    formatted_output = (
+        "import numpy as np\n\n"
+        "predictions = np.select(\n"
+        "    [\n        " + conditions_str + "\n    ],\n"
+        "    [\n        " + values_str + "\n    ],\n"
+        "    default=-1\n"
+        ")\n"
+    )
+
+    return formatted_output
 
 
 def tree_to_where(tree, feature_names):
     """
-    Converts a trained Decision Tree into readable 'WHERE' conditions and prints it as a table.
+    Converts a trained Decision Tree into readable 'WHERE' conditions 
+    and prints it as a table in the CLI.
     """
     rules = []
 
@@ -51,10 +63,7 @@ def tree_to_where(tree, feature_names):
         """Recursively traverse the tree and collect rules."""
         if tree_.children_left[node] == -1:  # Leaf node
             prediction = tree_.value[node].argmax()  # Get predicted class
-            rules.append({
-                "Condition": " & ".join(conditions),
-                "Prediction": prediction
-            })
+            rules.append([f"WHERE {' AND '.join(conditions)}", prediction])
             return
 
         # Get feature and threshold
@@ -70,10 +79,9 @@ def tree_to_where(tree, feature_names):
     recurse(0)
 
     # Convert to a Pandas DataFrame for better readability
-    df_rules = pd.DataFrame(rules)
+    df_rules = pd.DataFrame(rules, columns=["Condition", "Prediction"])
 
-    # Print as a table in Jupyter Notebook
-    from IPython.display import display
-    display(df_rules)
+    # Print formatted table in CLI
+    print(tabulate(df_rules, headers="keys", tablefmt="grid"))
 
     return df_rules
